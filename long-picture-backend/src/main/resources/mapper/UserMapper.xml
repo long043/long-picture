@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yupi.yupicturebackend.mapper.UserMapper">
+    <!--  "resultMap id=... type=..."这一行是 MyBatis里结果映射的 “规则中心”：
+         id="BaseResultMap" 是MyBatis中 结果映射规则的唯一标识，相当于给这一套映射规则起了个名字，方便其他SQL语句复用。
+                                    告诉 MyBatis 怎么把数据库字段转成 Java 实体类属性；
+                                    让数据库查询结果能转成实体类对象-->
+    <resultMap id="BaseResultMap" type="com.yupi.yupicturebackend.model.entity.User">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+        <!-- 告诉 MyBatis，把数据库userPassword字段的值，赋给User实体类的userPassword属性，且数据库里这个字段是VARCHAR类型” -->
+            <result property="userAccount" column="userAccount" jdbcType="VARCHAR"/>
+            <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
+            <result property="userName" column="userName" jdbcType="VARCHAR"/>
+            <result property="userAvatar" column="userAvatar" jdbcType="VARCHAR"/>
+            <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
+            <result property="userRole" column="userRole" jdbcType="VARCHAR"/>
+            <result property="editTime" column="editTime" jdbcType="TIMESTAMP"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="vipExpireTime" column="vipExpireTime" jdbcType="TIMESTAMP"/>
+            <result property="vipCode" column="vipCode" jdbcType="VARCHAR"/>
+            <result property="vipNumber" column="vipNumber" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <!-- 作用是定义可复用的SQL片段
+     复用性：当多个SELECT/INSERT/UPDATE语句需要重复写这些字段时，只需引用<include refid="Base_Column_List"/>，无需重复罗列字段。
+     -->
+    <sql id="Base_Column_List">
+        id,userAccount,userPassword,
+        userName,userAvatar,userProfile,
+        userRole,editTime,createTime,
+        updateTime,isDelete,vipExpireTime,
+        vipCode,vipNumber
+    </sql>
+</mapper>
