@@ -8,8 +8,11 @@ import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.yupi.yupicturebackend.config.CosClientConfig;
+import com.yupi.yupicturebackend.exception.BusinessException;
+import com.yupi.yupicturebackend.exception.ErrorCode;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.ArrayList;
@@ -23,8 +26,7 @@ public class CosManager {
     @Resource
     private CosClientConfig cosClientConfig;
 
-    @Resource
-    private COSClient cosClient;
+    private volatile COSClient cosClient;
 
     /**
      * 上传对象
@@ -37,7 +39,7 @@ public class CosManager {
         PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucket(), key,
                 file);
         //调用cosClient的方法，传入请求，就可以上传对象了
-        return cosClient.putObject(putObjectRequest);
+        return getCosClient().putObject(putObjectRequest);
     }
 
     /**
@@ -47,7 +49,7 @@ public class CosManager {
      */
     public COSObject getObject(String key) {
         GetObjectRequest getObjectRequest = new GetObjectRequest(cosClientConfig.getBucket(), key);
-        return cosClient.getObject(getObjectRequest);
+        return getCosClient().getObject(getObjectRequest);
     }
 
     /**
@@ -93,7 +95,7 @@ public class CosManager {
         picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
         //将请求对象 putObjectRequest 发送给腾讯云 COS 服务，从而执行图片上传及附带的图片处理操作。
-        return cosClient.putObject(putObjectRequest);
+        return getCosClient().putObject(putObjectRequest);
     }
 
     /**
@@ -102,6 +104,24 @@ public class CosManager {
      * @param key 唯一键
      */
     public void deleteObject(String key) {
-        cosClient.deleteObject(cosClientConfig.getBucket(), key);
+        getCosClient().deleteObject(cosClientConfig.getBucket(), key);
+    }
+
+    private synchronized COSClient getCosClient() {
+        if (!cosClientConfig.isConfigured()) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请先配置 cos.client");
+        }
+        if (cosClient != null) {
+            return cosClient;
+        }
+        cosClient = cosClientConfig.createClient();
+        return cosClient;
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (cosClient != null) {
+            cosClient.shutdown();
+        }
     }
 }

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class AliYunAiApi {
 
     // 读取配置文件
-    @Value("${aliYunAi.apiKey}")
+    @Value("${aliYunAi.apiKey:}")
     private String apiKey;
 
     // 创建任务地址
@@ -38,6 +38,7 @@ public class AliYunAiApi {
         if (createOutPaintingTaskRequest == null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "扩图参数为空");
         }
+        checkApiKey();
         // 通过Hutool的HTTP请求工具类构造一个HTTP请求。然后发送请求，调用阿里云百炼的API
         HttpRequest httpRequest = HttpRequest.post(CREATE_OUT_PAINTING_TASK_URL)
                 .header("Authorization", "Bearer " + apiKey)
@@ -73,6 +74,7 @@ public class AliYunAiApi {
         if (StrUtil.isBlank(taskId)) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "任务 ID 不能为空");
         }
+        checkApiKey();
         // 处理响应
         String url = String.format(GET_OUT_PAINTING_TASK_URL, taskId);
         try (HttpResponse httpResponse = HttpRequest.get(url)
@@ -83,6 +85,12 @@ public class AliYunAiApi {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "获取任务结果失败");
             }
             return JSONUtil.toBean(httpResponse.body(), GetOutPaintingTaskResponse.class);
+        }
+    }
+
+    private void checkApiKey() {
+        if (StrUtil.isBlank(apiKey)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请先配置 aliYunAi.apiKey");
         }
     }
 }
