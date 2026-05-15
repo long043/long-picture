@@ -24,6 +24,9 @@
         <a-button type="primary" :icon="h(FullscreenOutlined)" @click="doImagePainting">
           AI 扩图
         </a-button>
+        <a-button type="primary" :icon="h(EyeOutlined)" @click="doImageEnhance">
+          AI 清晰
+        </a-button>
       </a-space>
       <ImageCropper
         ref="imageCropperRef"
@@ -38,6 +41,12 @@
         :picture="picture"
         :spaceId="spaceId"
         :onSuccess="onImageOutPaintingSuccess"
+      />
+      <ImageEnhance
+        ref="imageEnhanceRef"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onImageEnhanceSuccess"
       />
     </div>
     <!-- 图片信息表单 -->
@@ -95,8 +104,9 @@ import {
 import { useRoute, useRouter } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import ImageCropper from '@/components/ImageCropper.vue'
-import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, FullscreenOutlined, EyeOutlined } from '@ant-design/icons-vue'
 import ImageOutPainting from '@/components/ImageOutPainting.vue'
+import ImageEnhance from '@/components/ImageEnhance.vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
 
 const router = useRouter()
@@ -223,6 +233,19 @@ const doImagePainting = async () => {
 
 // AI 扩图保存事件
 const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
+// ----- AI 清晰引用 -----
+const imageEnhanceRef = ref()
+
+// 打开 AI 清晰弹窗
+const doImageEnhance = async () => {
+  imageEnhanceRef.value?.openModal()
+}
+
+// AI 清晰保存事件
+const onImageEnhanceSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
 }
 
