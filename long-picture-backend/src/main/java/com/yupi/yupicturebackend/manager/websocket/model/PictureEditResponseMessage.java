@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * 图片编辑响应消息
+ * 比如：服务端要给其他连接的用户发送某用户的编辑消息
  */
 @Data
 @NoArgsConstructor

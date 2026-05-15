@@ -5,9 +5,8 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 图片上传请求
+ * 图片上传请求，用于接收请求参数的类
  *
- * @author 程序员鱼皮 <a href="https://www.codefather.cn">编程导航原创项目</a>
  */
 @Data
 public class PictureUploadRequest implements Serializable {

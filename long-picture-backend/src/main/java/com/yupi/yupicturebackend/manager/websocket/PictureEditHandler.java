@@ -27,8 +27,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 图片编辑 WebSocket处理器，在连接成功、连接关闭，接收到客户端消息时进行相应的处理。
- * TextWebSocketHandler：是处理文本消息的基础处理器
+ * 定义图片编辑 WebSocket处理器类，在连接成功、连接关闭，接收到客户端消息时进行相应的处理。
+ * TextWebSocketHandler：是处理文本消息的基础处理器，它实现了WebSocketHandler接口
  */
 @Component
 @Slf4j
@@ -41,10 +41,10 @@ public class PictureEditHandler extends TextWebSocketHandler {
     @Lazy
     private PictureEditEventProducer pictureEditEventProducer;
 
-    // 每张图片的编辑状态，key: pictureId, value: UserId
+    // 记录当前正在编辑图片的的用户， key: pictureId, value: UserId
     private final Map<Long, Long> pictureEditingUsers = new ConcurrentHashMap<>();
 
-    // 保存所有连接的会话，key: pictureId, value: 用户会话集合
+    // 记录某张图片对应的所有websocket的session连接， key: pictureId, value: websocketSession
     private final Map<Long, Set<WebSocketSession>> pictureSessions = new ConcurrentHashMap<>();
 
     /**
@@ -57,13 +57,20 @@ public class PictureEditHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         //显示调用父类（实际上没什么用）
         super.afterConnectionEstablished(session);
-        //attributes将数据 ——> session中
-        //代码主要作用是从 WebSocket 会话的属性中提取关键业务数据，为后续的多人协作编辑逻辑提供基础支撑
+
+        //保存会话到集合中
+        //attributes中的数据 ——> session中
+        //从 WebSocket 会话的属性中提取关键业务数据，为后续的多人协作编辑逻辑提供基础支撑
         User user = (User) session.getAttributes().get("user");
         Long pictureId = (Long) session.getAttributes().get("pictureId");
         //创建图片的会话集合
+        //pictureId:键
+        //ConcurrentHashMap.newKeySet()：值。创建一个线程安全的空集合（Set），用来装 “查看这张图片的用户连接”。
         pictureSessions.putIfAbsent(pictureId, ConcurrentHashMap.newKeySet());
+        //get(pictureId)：根据当前图片的 pictureId，从 pictureSessions 中获取对应的 “用户会话集合”
+        //add(session)：将当前会话添加到 “用户会话集合” 中
         pictureSessions.get(pictureId).add(session);
+
         // 构造响应，发送加入编辑的消息通知
         PictureEditResponseMessage pictureEditResponseMessage = new PictureEditResponseMessage();
         pictureEditResponseMessage.setType(PictureEditMessageTypeEnum.INFO.getValue());
@@ -82,9 +89,11 @@ public class PictureEditHandler extends TextWebSocketHandler {
      * @throws Exception
      */
     @Override
-    //TextMessage：客户端通过JavaScript的WebSocket API发送文本消息。
+    //TextMessage：WebSocket协议规定的文本消息（TextMessage）
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+
         super.handleTextMessage(session, message);
+
         //客户端发送的消息 ——> java对象
         PictureEditRequestMessage pictureEditRequestMessage = JSONUtil.toBean(message.getPayload(), PictureEditRequestMessage.class);
         // 从 Session 属性中获取到公共参数
@@ -95,7 +104,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 处理每个消息的方؜法。首先是用户进入编辑状态，要设置当前用户为编辑用户，并且向其他客户端发送消息：
+     * 处理每个消息类型的方؜法。首先是用户进入编辑状态，要设置当前用户为编辑用户，并且向其他客户端发送消息：
      * @param pictureEditRequestMessage
      * @param session
      * @param user
@@ -119,7 +128,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 处理编辑操作
+     * 执行编辑操作
      *
      * @param pictureEditRequestMessage
      * @param session
@@ -127,14 +136,10 @@ public class PictureEditHandler extends TextWebSocketHandler {
      * @param pictureId
      */
     public void handleEditActionMessage(PictureEditRequestMessage pictureEditRequestMessage, WebSocketSession session, User user, Long pictureId) throws IOException {
-        //正在编辑的用户
         //从图片-用户集合中获取当前正在编辑该图片的用户 ID
         Long editingUserId = pictureEditingUsers.get(pictureId);
         //从请求消息中获取客户端执行的编辑动作（如 move、scale、rotate 等）。
         String editAction = pictureEditRequestMessage.getEditAction();
-        //返回的枚举常量具体是什么？
-        //actionEnum.getValue() → 返回 "ZOOM_IN"（客户端传递的标识）。
-        //actionEnum.getText() → 返回 "放大操作"（中文描述）。
         PictureEditActionEnum actionEnum = PictureEditActionEnum.getEnumByValue(editAction);
         if (actionEnum == null) {
             log.error("无效的编辑动作");
@@ -213,8 +218,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
     }
 
     /**
-     * 广播给该图片的所有用户（支持排除掉某个 Session）
-     *
+     * 广播消息的方法：将消息传递给所有协作者
      * @param pictureId
      * @param pictureEditResponseMessage
      * @param excludeSession
@@ -223,16 +227,16 @@ public class PictureEditHandler extends TextWebSocketHandler {
         Set<WebSocketSession> sessionSet = pictureSessions.get(pictureId);
         if (CollUtil.isNotEmpty(sessionSet)) {
 
-            //由于前端js不能直接接收long类型的数据，会造成精度丢失。配置序列化：将 Long 类型转为 String，解决丢失精度问题
+            //由于前端js不能直接接收Long类型的数据，会造成精度丢失。配置序列化：将 Long 类型转为 String，解决丢失精度问题
             ObjectMapper objectMapper = new ObjectMapper();
             SimpleModule module = new SimpleModule();
             module.addSerializer(Long.class, ToStringSerializer.instance);
             module.addSerializer(Long.TYPE, ToStringSerializer.instance); // 支持 long 基本类型
             objectMapper.registerModule(module);
 
-            //序列化为 JSON 字符串
+            //将图片编辑响应消息对象序列化为JSON字符串 message
             String message = objectMapper.writeValueAsString(pictureEditResponseMessage);
-            //再将响应消息封装成websocket支持的消息类型
+            //再将 message 封装成websocket支持的消息类型
             TextMessage textMessage = new TextMessage(message);
             for (WebSocketSession session : sessionSet) {
                 // 排除掉的 session 不发送
@@ -241,7 +245,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
                 }
                 //给别的客户端发送消息
                 if (session.isOpen()) {
-                    //WebSocketSession.sendMessage(...) 的参数约束。其sendMessage 方法要求传入 WebSocketMessage 类型的参数。WebSocket 协议规定了 两种消息类型：文本消息（TextMessage），二进制消息（BinaryMessage）
+//WebSocketSession.sendMessage(...) 的参数约束。其sendMessage 方法要求传入 WebSocketMessage 类型的参数。WebSocket 协议规定了 两种消息类型：文本消息（TextMessage），二进制消息（BinaryMessage）
                     session.sendMessage(textMessage);
                 }
             }
@@ -258,8 +262,6 @@ public class PictureEditHandler extends TextWebSocketHandler {
         broadcastToPicture(pictureId, pictureEditResponseMessage, null);
     }
 }
-
-
 
 
 

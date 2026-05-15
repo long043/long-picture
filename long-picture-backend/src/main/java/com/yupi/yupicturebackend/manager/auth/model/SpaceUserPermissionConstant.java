@@ -2,6 +2,7 @@ package com.yupi.yupicturebackend.manager.auth.model;
 
 /**
  * 空间成员权限常量
+ * 角色常量之前定义过枚举类了
  */
 public interface SpaceUserPermissionConstant {
 

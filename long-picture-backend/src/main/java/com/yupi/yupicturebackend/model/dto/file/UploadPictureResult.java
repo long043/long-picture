@@ -3,7 +3,7 @@ package com.yupi.yupicturebackend.model.dto.file;
 import lombok.Data;
 
 /**
- * 上传图片的结果
+ * 上传图片的结果，用于接收图片解析信息的包装类：
  */
 @Data
 public class UploadPictureResult {

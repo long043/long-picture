@@ -47,24 +47,24 @@ public abstract class PictureUploadTemplate {
         String uuid = RandomUtil.randomString(16);
         String originalFilename = getOriginFilename(inputSource);
         // 自己拼接文件上传路径，而不是使用原始文件名称，可以增强安全性
-        String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid,
-                FileUtil.getSuffix(originalFilename));
+        String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid, FileUtil.getSuffix(originalFilename));
         String uploadPath = String.format("/%s/%s", uploadPathPrefix, uploadFilename);
         File file = null;
         try {
             // 3. 创建临时文件，获取文件到服务器
             file = File.createTempFile(uploadPath, null);
-            // 处理文件来源
+            // 处理文件来源，将输入源 inputSource 中的数据写入到临时文件file中。
             processFile(inputSource, file);
-            // 4. 上传图片到对象存储
+            // 4. 上传图片到对象存储。
+            //    得到一个putObjectResult，它用来存储图片上传到云存储后的处理结果信息。
             PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
             // 5. 获取图片信息对象，封装返回结果
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
-            // 获取到图片处理结果
+            // 获取图片在云存储中经过处理后的结果集合
             ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
             List<CIObject> objectList = processResults.getObjectList();
             if (CollUtil.isNotEmpty(objectList)) {
-                // 获取压缩之后得到的文件信息
+                // 获取Webp格式转换的文件信息。get(0):取到cosmanager.putPictureObject()方法中，设置的图片处理规则的第一条（即Webp格式转换）
                 CIObject compressedCiObject = objectList.get(0);
                 // 缩略图默认等于压缩图
                 CIObject thumbnailCiObject = compressedCiObject;
@@ -177,16 +177,3 @@ public abstract class PictureUploadTemplate {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

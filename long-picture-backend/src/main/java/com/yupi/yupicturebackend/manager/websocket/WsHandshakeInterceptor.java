@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * WebSocket 拦截器，建立连接前要先校验
+ * WebSocket 拦截器，建立连接前要先对用户权限校验，通过后，将登陆用户信息，要编辑的图片信息保存到websocket 的session中
  * HandshakeInterceptor：Spring WebSocket 中用于拦截 WebSocket 握手过程的标准接口
  */
 @Slf4j
@@ -60,12 +60,12 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
      * 在WebSoc؜ket连接前需要进行权限校验؜，如果发现用户没有团队空间内编辑图片的权限，则拒绝握手，可以通过定义一个WebSocket拦截器实现这个能力。
      *
      * 通过 WebSocket 拦截器，为即将建立连接的 WebSocket会话指定一些属性
-     *因为 WebSocket连接建立后，后续收发消息（比如协同编辑时，用户A发 “移动图片”），这些消息不是HTTP请求，没有request对象 。
+     * 因为 WebSocket连接建立后，后续收发消息（比如协同编辑时，用户A发 “移动图片”），这些消息不是HTTP请求，没有request对象 。
      * 为了让后续消息能知道 “用户是谁、操作啥资源”，得在 WebSocket 刚建立连接时（握手阶段），用拦截器把这些信息“绑定”到WebSocket会话里 。
      *
      * attributes：是“上下文容器”，用于在握手阶段存储数据（如用户信息、图片 ID ），这些数据会传递到后续的WebSocket会话中，供消息处理时使用。
-     *ServerHttpRequest：客户端握手请求的 “信息载体”
-     *ServerHttpResponse：服务器准备返回给客户端的响应对象
+     * ServerHttpRequest：客户端握手请求的 “信息载体”
+     * ServerHttpResponse：服务器准备返回给客户端的响应对象
      */
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
         if (request instanceof ServletServerHttpRequest) {

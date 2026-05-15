@@ -41,7 +41,7 @@ public class FileManager {
     /**
      * 上传图片
      *
-     * @param multipartFile    文件
+     * @param multipartFile    用于接收前端上传的文件
      * @param uploadPathPrefix 上传路径前缀
      * @return
      */
@@ -52,8 +52,7 @@ public class FileManager {
         String uuid = RandomUtil.randomString(16);
         String originalFilename = multipartFile.getOriginalFilename();
         // 自己拼接文件上传路径，而不是使用原始文件名称，可以增强安全性
-        String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid,
-                FileUtil.getSuffix(originalFilename));
+        String uploadFilename = String.format("%s_%s.%s", DateUtil.formatDate(new Date()), uuid, FileUtil.getSuffix(originalFilename));
         String uploadPath = String.format("/%s/%s", uploadPathPrefix, uploadFilename);
         File file = null;
         try {

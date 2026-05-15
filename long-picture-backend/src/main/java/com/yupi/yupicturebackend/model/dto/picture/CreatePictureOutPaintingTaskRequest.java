@@ -6,7 +6,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 创建扩图任务请求
+ * 创建图片扩图任务请求
  */
 @Data
 public class CreatePictureOutPaintingTaskRequest implements Serializable {

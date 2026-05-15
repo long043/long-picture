@@ -11,6 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// 配置并创建一个可以在项目中直接使用的腾讯云 COS 客户端，让你的项目能轻松连接和操作腾讯云的对象存储服务。
+// COSClient类是腾讯云对象存储（COS）Java SDK 中的核心类，通过它提供的各种方法，能操作腾讯云存储中的各类服务
+
 @Configuration
 @ConfigurationProperties(prefix = "cos.client")
 @Data

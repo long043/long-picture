@@ -16,7 +16,10 @@ import org.springframework.web.socket.WebSocketSession;
 import javax.annotation.Resource;
 
 /**
- * 图片编辑事件处理器（消费者）
+ * 定义事件处理器类（消费者），处理图片编辑事件
+ * 根据事件对象中的消息类型，分发到websocket处理器中对应的方法。
+ *
+ * 此类要实现disruptor的workhandler接口，
  */
 @Component
 @Slf4j

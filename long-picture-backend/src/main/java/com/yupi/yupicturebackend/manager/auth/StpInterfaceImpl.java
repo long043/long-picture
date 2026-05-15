@@ -23,6 +23,7 @@ import com.yupi.yupicturebackend.service.PictureService;
 import com.yupi.yupicturebackend.service.SpaceService;
 import com.yupi.yupicturebackend.service.SpaceUserService;
 import com.yupi.yupicturebackend.service.UserService;
+import jdk.nashorn.internal.ir.CallNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -34,9 +35,9 @@ import java.util.*;
 
 import static com.yupi.yupicturebackend.constant.UserConstant.USER_LOGIN_STATE;
 
-/**
- *这是在编写权限认证类。
- * 前面usercontroller的登录接口中将登录态保存到了sa-token中。我们需要在现在这个类中实现“如何根据؜登录用户id 获取到用户已有的角色和权限列表”方法。
+/**·
+ * 编写权限认证类。
+ * 前面usercontroller的登录接口中将登录态保存到了sa-token中。我们需要在现在这个类中实现“如何根据؜登录用户id 获取到用户已有的角色和权限列表方法。
  *
  */
 @Component    // 保证此类被 SpringBoot 扫描，完成 Sa-Token 的自定义权限验证扩展
@@ -67,11 +68,11 @@ public class StpInterfaceImpl implements StpInterface {
      */
     @Override
     public List<String> getPermissionList(Object loginId, String loginType) {
-        // 判断 loginType，仅对类型为 "space" 进行权限校验
+        // 判断 loginType，仅对类型为 space 进行权限校验
         if (!StpKit.SPACE_TYPE.equals(loginType)) {
             return new ArrayList<>();
         }
-        // 管理员权限，表示权限校验通过
+        // 如果当前用户为管理员，直接返回管理员权限列表。
         List<String> ADMIN_PERMISSIONS = spaceUserAuthManager.getPermissionsByRole(SpaceRoleEnum.ADMIN.getValue());
         // 获取上下文对象
         SpaceUserAuthContext authContext = getAuthContextByRequest();
@@ -171,14 +172,7 @@ public class StpInterfaceImpl implements StpInterface {
     }
 
 
-    /**
-     * 定义一个上下文类，用于统一接收请求中传递来的参数
-     *
-     * 如何知道哪个请求包含؜了哪些字段呢？
-     * 可以从请求路径中提取到要访问的是哪个 Controller，就可知道当前Controller 的请求参数。
-     * 举个例子，如果访问地址是 /api/picture/xxx，那么一定是要调用 PictureController 的接口，这些接口的 id 字段都表示 pictureId。我们就可以通过访问地址来决定应该给上下文传递哪些字段
-     *
-     */
+    // 定义一个上下文类，用于统一接收请求中传递来的参数
     private SpaceUserAuthContext getAuthContextByRequest() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
         String contentType = request.getHeader(Header.CONTENT_TYPE.getValue());
@@ -233,4 +227,6 @@ public class StpInterfaceImpl implements StpInterface {
                 // 检查是否所有字段都为空
                 .allMatch(ObjectUtil::isEmpty);
     }
+
+
 }

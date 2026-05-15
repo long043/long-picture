@@ -50,16 +50,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author 程序员鱼皮 <a href="https://www.codefather.cn">编程导航原创项目</a>
- */
+
 @Slf4j
 @RestController
 @RequestMapping("/picture")
 public class PictureController {
 
     @Resource
-    private UserService userService;
+     private UserService userService;
 
     @Resource
     private PictureService pictureService;
@@ -255,13 +253,9 @@ public class PictureController {
 
     /**
      * 分页获取图片列表（封装类，有缓存！！！）
-     *  @PostMapping：属于 SpringMVC 的注解，用来映射 HTTP POST 请求 到指定的方法。
-     *  @PostMapping=@RequestMapping+@ResponseBody 。
-     *  @RestController=@Controller +@ResponseBody。
      */
     @PostMapping("/list/page/vo/cache")
-    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest,
-                                                                      HttpServletRequest request) {
+    public BaseResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest request) {
         long current = pictureQueryRequest.getCurrent();
         long size = pictureQueryRequest.getPageSize();
         // 限制爬虫
@@ -270,14 +264,10 @@ public class PictureController {
         pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
 
         // 查询缓存，缓存中没有，再查询数据库
-        // 构建缓存的 key
-        //由于接口支؜持传入不同的查询条؜件，对应的数据不同，因此需要将查询条件作为缓存key的一部分。将查询条件对象转换为Json对象
+        // 构建缓存的 key。由于接口支؜持传入不同的查询条؜件，对应的数据不同，因此需要将查询条件作为缓存key的一部分。将查询条件对象转换为Json对象
         String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
-        // 可以利用哈希算法来压缩 key。
         String hashKey = DigestUtils.md5DigestAsHex(queryCondition.getBytes());
-        //给key做区分隔离
         String cacheKey = String.format("yupicture:listPictureVOByPage:%s", hashKey);
-
 
         // 1. 先从本地缓存中查询
         String cachedValue = LOCAL_CACHE.getIfPresent(cacheKey);
@@ -297,7 +287,7 @@ public class PictureController {
         }
         // 3. 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
-                pictureService.getQueryWrapper(pictureQueryRequest));
+                pictureService.getQueryWrapper  (pictureQueryRequest));
         Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage, request);
         // 4. 更新缓存
         // 更新 Redis 缓存
@@ -419,6 +409,7 @@ public class PictureController {
 
     /**
      * 查询 AI 扩图任务
+     * get请求。前端传来的参数是 taskId（字符串类型），直接通过方法参数 String taskId 就可以接收，不需要额外定义一个 Model 实体类来封装。
      */
     @GetMapping("/out_painting/get_task")
     public BaseResponse<GetOutPaintingTaskResponse> getPictureOutPaintingTask(String taskId) {

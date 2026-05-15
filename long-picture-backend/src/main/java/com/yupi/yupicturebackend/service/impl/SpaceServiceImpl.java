@@ -90,8 +90,6 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         if (SpaceLevelEnum.COMMON.getValue() != space.getSpaceLevel() && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限创建指定级别的空间");
         }
-
-
         // 4. 控制同一用户只能创建一个私有空间、以及一个团队空间
         /**
          * String.valueOf(userId)：将 userId（int或long）转换为对应的字符串。intern():确保相同内容的字符串在常量池中只有一个实例,内容相同即对象相同
@@ -123,8 +121,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                     result = spaceUserService.save(spaceUser);
                     ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "创建团队成员记录失败");
                 }
-//                // 创建分表（仅对团队空间生效）为方便部署，暂时不使用
-//                dynamicShardingManager.createSpacePictureTable(space);
+                // 创建分表（仅对团队空间生效）为方便部署，暂时不使用
+                // dynamicShardingManager.createSpacePictureTable(space);
                 // 返回新写入的数据 id
                 return space.getId();
             });

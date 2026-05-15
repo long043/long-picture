@@ -59,10 +59,12 @@ ALTER TABLE picture
 -- 创建基于 reviewStatus 列的索引
 CREATE INDEX idx_reviewStatus ON picture (reviewStatus);
 
+-- 添加新列
 ALTER TABLE picture
-    -- 添加新列
     ADD COLUMN thumbnailUrl varchar(512) NULL COMMENT '缩略图 url';
-
+-- 添加新列
+ALTER TABLE picture
+    ADD COLUMN spaceId bigint  null comment '空间 id（为空表示公共空间）';
 
 -- 空间表
 create table if not exists space
@@ -85,10 +87,6 @@ create table if not exists space
     index idx_spaceLevel (spaceLevel) -- 提升按空间级别查询的效率
 ) comment '空间' collate = utf8mb4_unicode_ci;
 
--- 添加新列
-ALTER TABLE picture
-    ADD COLUMN spaceId bigint  null comment '空间 id（为空表示公共空间）';
-
 -- 创建索引
 CREATE INDEX idx_spaceId ON picture (spaceId);
 
@@ -106,7 +104,7 @@ CREATE INDEX idx_spaceType ON space (spaceType);
 -- if not exists:表示表不存在则创建，若存在则不创建
 create table if not exists space_user
 (
--- 字段名       字段类型   特殊字段属性                          主键约束
+-- 字段名       字段类型   特殊字段属性
     id         bigint auto_increment comment 'id' primary key,
     spaceId    bigint                                 not null comment '空间 id',
     userId     bigint                                 not null comment '用户 id',

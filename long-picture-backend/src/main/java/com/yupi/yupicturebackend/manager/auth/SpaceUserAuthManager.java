@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * 空间成员权限管理
- * 可加载配置文件到对象，并提供根据角色获取权限列表的方法。
+ * 可加载json配置文件到之前定义好的实体类中，并提供根据角色获取权限列表的方法。
  */
 @Component
 public class SpaceUserAuthManager {
@@ -34,9 +34,14 @@ public class SpaceUserAuthManager {
     @Resource
     private SpaceUserService spaceUserService;
 
+    /**
+     * 将json配置文件转换为 java 对象
+     *
+     * 定义了一个静态的 SpaceUserAuthConfig 类型常量。静态代码块只在类加载时执行一次，避免多次加载。
+     * 使用hutool工具类 resourceUtil 读取资源目录下的json权限配置文件，得到一个json字符串
+     * 再通过jsonUtil将json字符串转换为 SpaceUserAuthConfig 类型的对象。
+     */
     public static final SpaceUserAuthConfig SPACE_USER_AUTH_CONFIG;
-
-    //将json配置文件转成对应实体类
     static {
         String json = ResourceUtil.readUtf8Str("biz/spaceUserAuthConfig.json");
         SPACE_USER_AUTH_CONFIG = JSONUtil.toBean(json, SpaceUserAuthConfig.class);
@@ -52,9 +57,9 @@ public class SpaceUserAuthManager {
         if (StrUtil.isBlank(spaceUserRole)) {
             return new ArrayList<>();
         }
-        //找到匹配的角色
+        // 找到匹配的角色
         SpaceUserRole role = SPACE_USER_AUTH_CONFIG.getRoles()
-                //下面这是通过stream遍历SpaceUserAuthConfig类中的roles
+                //下面通过streamAPI遍历 SpaceUserAuthConfig 类中的roles
                 .stream()
                 .filter(r -> r.getKey().equals(spaceUserRole))
                 .findFirst()

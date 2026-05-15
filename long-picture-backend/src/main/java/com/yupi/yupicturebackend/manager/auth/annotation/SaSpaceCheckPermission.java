@@ -11,13 +11,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 这是为 “团队空间权限校验” 自定义注解，与其他体系（如普通用户）互不干扰。
+ * 注解合并：为 团队空间权限校验 自定义注解，与用户表体系互不干扰。
+ *
+ * @ Target：限定 AuthCheck 注解只能用在 “方法” 上 。
+ * @ Retention： 指定注解的保留策略，决定了自定义注解在程序的哪个阶段（编译、运行等）保持有效，
+ *    RetentionPolicy.RUNTIME 表示该注解在程序运行时依然存在，能被反射机制读取到。
  */
-//当前注解@SaSpaceCheckPermission继承了Sa-Token框架的@SaCheckPermission注解，并固定type属性为space.
+// 当前注解@SaSpaceCheckPermission继承了Sa-Token框架的@SaCheckPermission注解，并固定type属性为space.
 @SaCheckPermission(type = StpKit.SPACE_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-//使用@SaSpaceCheckPermission时，无需手动指定 type，它会自动关联到 “团队空间” 的权限校验逻辑
+//使用@SaSpaceCheckPermission时，无需手动指定type，它会自动关联到团队空间的权限校验逻辑
 public @interface SaSpaceCheckPermission {
 
     /**

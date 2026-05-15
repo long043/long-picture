@@ -29,7 +29,7 @@ public class AliYunAiApi {
 
 
     /**
-     * 创建任务
+     * 创建扩图任务
      *
      * @param createOutPaintingTaskRequest
      * @return
@@ -38,20 +38,22 @@ public class AliYunAiApi {
         if (createOutPaintingTaskRequest == null) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "扩图参数为空");
         }
-        // 发送请求
+        // 通过Hutool的HTTP请求工具类构造一个HTTP请求。然后发送请求，调用阿里云百炼的API
         HttpRequest httpRequest = HttpRequest.post(CREATE_OUT_PAINTING_TASK_URL)
                 .header("Authorization", "Bearer " + apiKey)
                 // 必须开启异步处理
                 .header("X-DashScope-Async", "enable")
                 .header("Content-Type", "application/json")
                 .body(JSONUtil.toJsonStr(createOutPaintingTaskRequest));
-        // 处理响应
+        // 处理响应。.execute() 方法是触发 HTTP 请求发送的核心，它会实际向阿里云百炼的 API 接口发起调用并获取返回结果。
         try (HttpResponse httpResponse = httpRequest.execute()) {
             if (!httpResponse.isOk()) {
                 log.error("请求异常：{}", httpResponse.body());
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI 扩图失败");
             }
+            //将响应体转换为java响应对象
             CreateOutPaintingTaskResponse createOutPaintingTaskResponse = JSONUtil.toBean(httpResponse.body(), CreateOutPaintingTaskResponse.class);
+            //API官方文档中，有code值是错误。如果成功是不返回这个值的
             if (createOutPaintingTaskResponse.getCode() != null) {
                 String errorMessage = createOutPaintingTaskResponse.getMessage();
                 log.error("请求异常：{}", errorMessage);

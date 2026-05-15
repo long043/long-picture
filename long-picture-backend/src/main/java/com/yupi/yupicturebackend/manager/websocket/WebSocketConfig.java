@@ -9,6 +9,8 @@ import javax.annotation.Resource;
 
 /**
  * WebSocket 配置（定义连接）
+ *
+ * 定义websocket配置类。配置 WebSocket 映射，将客户端发起 WebSocket 连接的请求路径与自定义的 WebSocketHandler 关联。
  */
 @Configuration
 @EnableWebSocket

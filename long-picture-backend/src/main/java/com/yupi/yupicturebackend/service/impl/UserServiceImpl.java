@@ -152,10 +152,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 4. 保存用户的登录态
         request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, user);
-        //让用户同时在 Sa-Token 空间体系中 “登录”，便于空间鉴权时使用，注意保证该用户信息与 SpringSession 中的信息过期时间一致
+        //让用户同时在 Sa-Token 空间体系中登录，便于空间鉴权时使用（注意保证该用户信息与 SpringSession 中的信息过期时间一致，这句话不重要）
         StpKit.SPACE.login(user.getId());
         StpKit.SPACE.getSession().set(UserConstant.USER_LOGIN_STATE, user);
-        //为什么用this???表示当前serveiceimpl类的实例
+        // 表示当前serveiceimpl类的实例
         return this.getLoginUserVO(user);
     }
 

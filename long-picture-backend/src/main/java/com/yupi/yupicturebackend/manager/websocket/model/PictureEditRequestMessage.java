@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 图片编辑请求消息。包含消息类型和编辑动作
+ * 客户端向服务端发送的图片编辑请求消息，包含消息类型和编辑动作。
  */
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class PictureEditRequestMessage {
 
     /**
-     * 消息类型，例如 "ENTER_EDIT", "EXIT_EDIT", "EDIT_ACTION"
+     * 消息类型，例如 "INFO", "ERROR","ENTER_EDIT", "EXIT_EDIT", "EDIT_ACTION"
      */
     private String type;
 

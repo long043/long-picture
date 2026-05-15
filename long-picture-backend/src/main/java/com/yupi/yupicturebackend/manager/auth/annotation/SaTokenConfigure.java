@@ -12,7 +12,6 @@ import javax.annotation.PostConstruct;
 /**
  * Sa-Token 开启注解和配置
  */
-//标记这是一个Spring配置类，Spring启动时会自动加载并解析其中的配置逻辑。
 @Configuration
 public class SaTokenConfigure implements WebMvcConfigurer {
     @Override

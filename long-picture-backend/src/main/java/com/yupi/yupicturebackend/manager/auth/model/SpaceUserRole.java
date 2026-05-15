@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * 空间成员角色 对应权限配置文件中 空间用户角色 的实体类
+ * 空间用户角色的实体类 ----> 对应权限配置文件中空间成员角色
  */
 @Data
 public class SpaceUserRole implements Serializable {

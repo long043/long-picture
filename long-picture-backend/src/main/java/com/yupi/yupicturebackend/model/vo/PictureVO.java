@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ *
+ * 新建上传成功后返回给前端的响应类
+ */
+
 @Data
 public class PictureVO implements Serializable {
 

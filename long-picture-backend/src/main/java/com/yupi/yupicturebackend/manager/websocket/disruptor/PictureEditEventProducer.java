@@ -18,11 +18,13 @@ import javax.annotation.Resource;
 @Slf4j
 public class PictureEditEventProducer {
 
+    //引入一个Disruptor组件
     @Resource
     private Disruptor<PictureEditEvent> pictureEditEventDisruptor;
 
     /**
-     * 发布事件
+     * 定义事件生产者类
+     * 把事件发到 Disruptor 的环形缓冲区中
      *
      * @param pictureEditRequestMessage
      * @param session
@@ -30,11 +32,13 @@ public class PictureEditEventProducer {
      * @param pictureId
      */
     public void publishEvent(PictureEditRequestMessage pictureEditRequestMessage, WebSocketSession session, User user, Long pictureId) {
+
         RingBuffer<PictureEditEvent> ringBuffer = pictureEditEventDisruptor.getRingBuffer();
         // 获取到可以放置事件的下一个位置
         long next = ringBuffer.next();
+        //根据get(next)获取到要存放的事件对象
         PictureEditEvent pictureEditEvent = ringBuffer.get(next);
-        //设置事件内容（封装业务数据）
+        //给事件对象赋值（封装业务数据）
         pictureEditEvent.setPictureEditRequestMessage(pictureEditRequestMessage);
         pictureEditEvent.setSession(session);
         pictureEditEvent.setUser(user);
@@ -42,6 +46,7 @@ public class PictureEditEventProducer {
         // 发布事件
         ringBuffer.publish(next);
     }
+
 
     /**
      * 优雅停机

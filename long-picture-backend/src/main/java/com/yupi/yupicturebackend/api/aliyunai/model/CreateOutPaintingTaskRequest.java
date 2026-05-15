@@ -7,7 +7,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * 创建扩图任务请求
+ * 创建扩图任务请求类
  */
 @Data
 public class CreateOutPaintingTaskRequest implements Serializable {
@@ -18,12 +18,12 @@ public class CreateOutPaintingTaskRequest implements Serializable {
     private String model = "image-out-painting";
 
     /**
-     * 输入图像信息
+     * 输入图像信息，比如图像URL地址。
      */
     private Input input;
 
     /**
-     * 图像处理参数
+     * 图像处理参数，设置输出图像的处理参数，如逆时针旋转角度、宽高比、扩展比例、四个方向像素填充等。
      */
     private Parameters parameters;
 
