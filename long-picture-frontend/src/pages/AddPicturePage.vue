@@ -116,8 +116,14 @@ const picture = ref<API.PictureVO>()
 const pictureForm = reactive<API.PictureEditRequest>({})
 const uploadType = ref<'file' | 'url'>('file')
 // 空间 id
-const spaceId = computed(() => {
-  return route.query?.spaceId
+const spaceId = computed<number | undefined>(() => {
+  const routeSpaceId = route.query?.spaceId
+  const rawSpaceId = Array.isArray(routeSpaceId) ? routeSpaceId[0] : routeSpaceId
+  if (!rawSpaceId) {
+    return undefined
+  }
+  const parsedSpaceId = Number(rawSpaceId)
+  return Number.isFinite(parsedSpaceId) ? parsedSpaceId : undefined
 })
 
 /**

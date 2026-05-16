@@ -1,15 +1,15 @@
-import axios from "axios";
-import {message} from "ant-design-vue";
+import axios from 'axios'
+import { message } from 'ant-design-vue'
 
-// 区分开发和生产环境
-//const DEV_BASE_URL = "http://localhost:8123";
-const PROD_BASE_URL = "http://49.232.216.174";
-// 创建 Axios 实例
+const DEFAULT_PROD_BASE_URL = 'http://49.232.216.174'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? '' : DEFAULT_PROD_BASE_URL)
+
+// 创建 Axios 实例。开发环境使用 Vite 代理，避免本地请求打到线上后端。
 const myAxios = axios.create({
-    baseURL: PROD_BASE_URL,
-    timeout: 10000,
-    withCredentials: true,
-});
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  withCredentials: true,
+})
 
 // 全局请求拦截器
 myAxios.interceptors.request.use(
@@ -42,9 +42,11 @@ myAxios.interceptors.response.use(
   },
   function (error) {
     // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
+    if (!error.response) {
+      message.error('请求失败，请检查本地后端是否已启动')
+    }
     return Promise.reject(error)
   },
 )
 
-export default myAxios;
+export default myAxios

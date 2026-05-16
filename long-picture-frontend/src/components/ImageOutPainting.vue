@@ -3,22 +3,23 @@
     class="image-out-painting"
     v-model:visible="visible"
     title="AI 扩图"
+    width="min(1200px, calc(100vw - 32px))"
     :footer="false"
     @cancel="closeModal"
   >
-    <a-row gutter="16">
-      <a-col span="12">
+    <a-row :gutter="[24, 24]" class="image-compare-row">
+      <a-col :xs="24" :md="12">
         <h4>原始图片</h4>
-        <img :src="picture?.url" :alt="picture?.name" style="max-width: 100%" />
+        <div class="image-preview-panel">
+          <img class="image-preview" :src="picture?.url" :alt="picture?.name" />
+        </div>
       </a-col>
-      <a-col span="12">
+      <a-col :xs="24" :md="12">
         <h4>扩图结果</h4>
-        <img
-          v-if="resultImageUrl"
-          :src="resultImageUrl"
-          :alt="picture?.name"
-          style="max-width: 100%"
-        />
+        <div class="image-preview-panel">
+          <img v-if="resultImageUrl" class="image-preview" :src="resultImageUrl" :alt="picture?.name" />
+          <div v-else class="image-preview-placeholder">等待生成</div>
+        </div>
       </a-col>
     </a-row>
     <div style="margin-bottom: 16px" />
@@ -180,5 +181,47 @@ defineExpose({
 <style>
 .image-out-painting {
   text-align: center;
+}
+
+.image-out-painting .ant-modal-body {
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+.image-out-painting .image-compare-row {
+  align-items: stretch;
+}
+
+.image-out-painting h4 {
+  margin-bottom: 12px;
+}
+
+.image-out-painting .image-preview-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  height: min(64vh, 640px);
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.image-out-painting .image-preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.image-out-painting .image-preview-placeholder {
+  color: #999;
+}
+
+@media (max-width: 767px) {
+  .image-out-painting .image-preview-panel {
+    min-height: 280px;
+    height: 48vh;
+  }
 }
 </style>
