@@ -69,14 +69,7 @@ public class CosManager {
         picOperations.setIsPicInfo(1);
         // 图片处理规则列表
         List<PicOperations.Rule> rules = new ArrayList<>();
-        // 1. 图片压缩（转成 webp 格式）
-        String webpKey = FileUtil.mainName(key) + ".webp";
-        PicOperations.Rule compressRule = new PicOperations.Rule();
-        compressRule.setFileId(webpKey);
-        compressRule.setBucket(cosClientConfig.getBucket());
-        compressRule.setRule("imageMogr2/format/webp");
-        rules.add(compressRule);
-        // 2. 缩略图处理，仅对 > 20 KB 的图片生成缩略图
+        // 仅生成缩略图，主图保持用户上传的原始文件，不做格式转换或压缩。
         if (file.length() > 2 * 1024) {
             PicOperations.Rule thumbnailRule = new PicOperations.Rule();
             // 拼接缩略图的路径
@@ -84,7 +77,7 @@ public class CosManager {
             thumbnailRule.setFileId(thumbnailKey);
             thumbnailRule.setBucket(cosClientConfig.getBucket());
             // 缩放规则 /thumbnail/<Width>x<Height>>（如果大于原图宽高，则不处理）
-            thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 256, 256));
+            thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 512, 512));
             rules.add(thumbnailRule);
         }
         /**
@@ -92,7 +85,9 @@ public class CosManager {
          * 将之前创建并配置好的图片处理操作参数（picOperations对象，其中包含了“返回原图信息”等处理规则），设置到上传对象请求（putObjectRequest）中。
          * 这样在执行上传操作时，对象存储服务会按照 picOperations 中定义的规则，对要上传的图片进行处理（比如获取原图的尺寸、格式等信息），让上传过程与图片处理逻辑结合起来。
          */
-        picOperations.setRules(rules);
+        if (!rules.isEmpty()) {
+            picOperations.setRules(rules);
+        }
         putObjectRequest.setPicOperations(picOperations);
         //将请求对象 putObjectRequest 发送给腾讯云 COS 服务，从而执行图片上传及附带的图片处理操作。
         return getCosClient().putObject(putObjectRequest);
