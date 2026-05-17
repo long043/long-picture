@@ -193,6 +193,7 @@ public class AiEnhancementServiceImpl implements AiEnhancementService {
         }
     }
 
+
     private String extractSdErrorMessage(String responseBody) {
         if (StrUtil.isBlank(responseBody)) {
             return "模型服务未返回错误详情";
