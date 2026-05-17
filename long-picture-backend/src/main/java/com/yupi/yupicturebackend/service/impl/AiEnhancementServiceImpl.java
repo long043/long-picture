@@ -178,6 +178,7 @@ public class AiEnhancementServiceImpl implements AiEnhancementService {
         return normalizedApiUrl + path;
     }
 
+
     private String parseInterrogateCaption(String responseBody) {
         try {
             JsonNode rootNode = objectMapper.readTree(responseBody);
