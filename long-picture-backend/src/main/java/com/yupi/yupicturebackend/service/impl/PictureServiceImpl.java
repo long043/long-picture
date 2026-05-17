@@ -89,6 +89,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     @Resource
     private AliYunAiApi aliYunAiApi;
 
+    private static final float DEFAULT_OUT_PAINTING_SCALE = 2.0F;
+
     //校验图片数据
     @Override
     public void validPicture(Picture picture) {
@@ -633,9 +635,53 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         CreateOutPaintingTaskRequest.Input input = new CreateOutPaintingTaskRequest.Input();
         input.setImageUrl(picture.getUrl());
         createOutPaintingTaskRequest.setInput(input);
-        createOutPaintingTaskRequest.setParameters(createPictureOutPaintingTaskRequest.getParameters());
+        createOutPaintingTaskRequest.setParameters(buildOutPaintingParameters(createPictureOutPaintingTaskRequest.getParameters()));
         // 创建扩图任务
         return aliYunAiApi.createOutPaintingTask(createOutPaintingTaskRequest);
+    }
+
+    private CreateOutPaintingTaskRequest.Parameters buildOutPaintingParameters(CreateOutPaintingTaskRequest.Parameters requestParameters) {
+        CreateOutPaintingTaskRequest.Parameters parameters = Optional.ofNullable(requestParameters)
+                .orElseGet(CreateOutPaintingTaskRequest.Parameters::new);
+        if (parameters.getXScale() == null
+                && parameters.getYScale() == null
+                && StrUtil.isBlank(parameters.getOutputRatio())
+                && parameters.getTopOffset() == null
+                && parameters.getBottomOffset() == null
+                && parameters.getLeftOffset() == null
+                && parameters.getRightOffset() == null) {
+            parameters.setXScale(DEFAULT_OUT_PAINTING_SCALE);
+            parameters.setYScale(DEFAULT_OUT_PAINTING_SCALE);
+        }
+        validOutPaintingParameters(parameters);
+        return parameters;
+    }
+
+    private void validOutPaintingParameters(CreateOutPaintingTaskRequest.Parameters parameters) {
+        ThrowUtils.throwIf(parameters.getAngle() != null
+                        && (parameters.getAngle() < 0 || parameters.getAngle() > 359),
+                ErrorCode.PARAMS_ERROR, "旋转角度必须在 0 到 359 之间");
+        validOutPaintingScale(parameters.getXScale(), "水平扩展比例");
+        validOutPaintingScale(parameters.getYScale(), "垂直扩展比例");
+        validOutPaintingOffset(parameters.getTopOffset(), "上方扩展像素");
+        validOutPaintingOffset(parameters.getBottomOffset(), "下方扩展像素");
+        validOutPaintingOffset(parameters.getLeftOffset(), "左侧扩展像素");
+        validOutPaintingOffset(parameters.getRightOffset(), "右侧扩展像素");
+        if (StrUtil.isNotBlank(parameters.getOutputRatio())) {
+            List<String> allowedRatioList = Arrays.asList("1:1", "3:4", "4:3", "9:16", "16:9");
+            ThrowUtils.throwIf(!allowedRatioList.contains(parameters.getOutputRatio()),
+                    ErrorCode.PARAMS_ERROR, "不支持的输出宽高比");
+        }
+    }
+
+    private void validOutPaintingScale(Float scale, String fieldName) {
+        ThrowUtils.throwIf(scale != null && (scale < 1.0F || scale > 3.0F),
+                ErrorCode.PARAMS_ERROR, fieldName + "必须在 1.0 到 3.0 之间");
+    }
+
+    private void validOutPaintingOffset(Integer offset, String fieldName) {
+        ThrowUtils.throwIf(offset != null && offset < 0,
+                ErrorCode.PARAMS_ERROR, fieldName + "不能小于 0");
     }
 
     /**
